@@ -40,13 +40,13 @@ const botRoute = bot => {
     }
   });
 
-  bot.command('/restartApp', ({message}) => {
+  bot.command('restartApp', ({message}) => {
     if (botHelper.isAdmin(message.from.id)) {
       botHelper.restartApp();
     }
   });
 
-  bot.command('/gitPull', ({message}) => {
+  bot.command('gitPull', ({message}) => {
     if (botHelper.isAdmin(message.from.id)) {
       botHelper.gitPull();
     }
