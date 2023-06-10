@@ -93,12 +93,15 @@ class BotHelper {
 
   gitPull() {
     // eslint-disable-next-line global-require
-    const {spawn} = require('child_process');
-    const gpull = spawn('git', ['pull']);
-    const rest = spawn('pm2', ['restart', process.env.APP_NAME]);
-    gpull.stdout.pipe(rest.stdin);
-    rest.stdout.on('data', data => {
-      this.sendAdmin(data);
+    const childProcess = require('child_process');
+    const git = childProcess.exec(
+      `git pull && pm2 restart ${process.env.APP_NAME}`,
+    );
+    git.stdout.on('data', data => {
+      this.sendAdmin(`Git: ${data}`);
+    });
+    git.stdout.on('end', () => {
+      this.sendAdmin('exit');
     });
   }
 }

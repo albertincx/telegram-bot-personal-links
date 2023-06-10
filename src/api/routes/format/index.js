@@ -95,6 +95,7 @@ const putLinks = id => `${memLinks[id].join('\n')}END`;
 
 const format = (bot, botHelper) => {
   bot.command('start', ctx => startOrHelp(ctx, botHelper));
+  bot.hears('Отмена', ctx => ctx.reply(messages.cancel(), keyboards.hide()));
   const addToQueue = (ctx, matchPhone) => {
     try {
       const {update} = ctx;
