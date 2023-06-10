@@ -5,8 +5,7 @@ const messages = require('../../../messages/format');
 const {getAllLinks, getLinkFromEntity} = require('../../utils/links');
 
 const wwwDirWithPhone = p => `${process.env.WWW_DIR || 'data/links'}/${p}`;
-const wwwDirWithUser = id =>
-  `${process.env.WWW_DIR || 'data/users'}/${id}/from.json`;
+const wwwDirWithUser = id => `${process.env.WWW_DIR || 'data/users'}/${id}`;
 // const group = process.env.TGGROUP;
 // const groupBugs = process.env.TGGROUPBUGS;
 
@@ -124,7 +123,7 @@ const format = (bot, botHelper) => {
           const uDir = wwwDirWithUser(id);
           try {
             // show links
-            let u = fs.readFileSync(uDir);
+            let u = `${fs.readFileSync(uDir)}/from.json`;
             if (u) {
               u = JSON.parse(`${u}`);
               if (u.phone) {
@@ -177,7 +176,10 @@ const format = (bot, botHelper) => {
               fs.mkdirSync(userDir, {recursive: true});
             }
             fs.writeFileSync(`${linksDir}/index.html`, putLinks(id), 'utf8');
-            fs.writeFileSync(`${userDir}`, JSON.stringify({...from, phone}));
+            fs.writeFileSync(
+              `${userDir}/from.json`,
+              JSON.stringify({...from, phone}),
+            );
             ctx.reply(messages.completed(memPhones[id]));
           }
         } else {
