@@ -1,13 +1,12 @@
 const fs = require('fs');
 const keyboards = require('../../../keyboards/keyboards');
 const messages = require('../../../messages/format');
-// const logger = require('../../utils/logger');
 
 const {getAllLinks, getLinkFromEntity} = require('../../utils/links');
 
-// const {validRegex} = require('../../../config/config.json');
-
-const wwwDir = process.env.WWW_DIR || 'data/links';
+const wwwDirWithPhone = p => `${process.env.WWW_DIR || 'data/links'}/${p}`;
+const wwwDirWithUser = id =>
+  `${process.env.WWW_DIR || 'data/users'}/${id}/from.json`;
 // const group = process.env.TGGROUP;
 // const groupBugs = process.env.TGGROUPBUGS;
 
@@ -94,11 +93,10 @@ const ADD_2 = 'ADD_2';
 const ADD_EXIT = 'ADD_EXIT';
 
 const putLinks = id => `${memLinks[id].join('\n')}END`;
+
 const format = (bot, botHelper) => {
   bot.command(['/start', '/help'], ctx => startOrHelp(ctx, botHelper));
   bot.hears('👋 Help', ctx => startOrHelp(ctx, botHelper));
-  // bot.hears('👍Support', ctx => support(ctx, botHelper));
-  // bot.command('support', ctx => support(ctx, botHelper));
   bot.hears('⌨️ Hide keyboard', ctx => {
     try {
       ctx.reply('Type /help to show.', keyboards.hide());
@@ -111,18 +109,51 @@ const format = (bot, botHelper) => {
       const {update} = ctx;
       const {message} = update;
       const {text, from, contact, entities} = message;
+      // console.log(ctx, matchPhone, entities);
       const {id} = from;
       let l = getAllLinks(text);
+
       if (entities) {
         const l2 = getLinkFromEntity(entities, text);
         if (l2 && l2.length) {
           l = l2;
         }
       }
+
       if (matchPhone) {
-        ctx.reply(messages.start2(), keyboards.contact());
+        let rep = messages.start2();
+        let keyb = keyboards.contact();
+
+        if (
+          ctx.match &&
+          ctx.match.input &&
+          ctx.match.input.startsWith('/show')
+        ) {
+          const uDir = wwwDirWithUser(id);
+          try {
+            // show links
+            let u = fs.readFileSync(uDir);
+            if (u) {
+              u = JSON.parse(`${u}`);
+              if (u.phone) {
+                const linksDir = `${wwwDirWithPhone(u.phone)}/index.html`;
+                const links = fs.readFileSync(linksDir);
+                rep = `${links}`.replace('END', '');
+              } else {
+                rep = 'Ссылки не найдены';
+              }
+            }
+            keyb = keyboards.nolinks();
+          } catch (e) {
+            console.log(e);
+            rep = 'Ссылки не найдены';
+          }
+        }
+
+        ctx.reply(rep, keyb);
         return;
       }
+
       if (contact) {
         if (id === contact.user_id) {
           memPhones[id] = contact.phone_number.replace('+', '');
@@ -143,15 +174,19 @@ const format = (bot, botHelper) => {
           if (mem[id] === ADD_2) {
             mem[id] = ADD_EXIT;
             memLinks[id] = (memLinks[id] || []).concat(link);
+            const linksDir = wwwDirWithPhone(phone);
+            const userDir = wwwDirWithUser(id);
             // save file
-            //
-            const linksDir = `${wwwDir}/${phone}`;
             if (!fs.existsSync(linksDir)) {
               fs.mkdirSync(linksDir, {recursive: true});
-              // skipCount = +`${fs.readFileSync(skipCountFile)}`.replace('SKIP_ITEMS=', '');
             }
-            fs.writeFileSync(`${linksDir}/index.html`, putLinks(id));
-            ctx.reply(messages.completed());
+            // save user
+            if (!fs.existsSync(userDir)) {
+              fs.mkdirSync(userDir, {recursive: true});
+            }
+            fs.writeFileSync(`${linksDir}/index.html`, putLinks(id), 'utf8');
+            fs.writeFileSync(`${userDir}`, JSON.stringify({...from, phone}));
+            ctx.reply(messages.completed(memPhones[id]));
           }
         } else {
           mem[id] = ADD_1;

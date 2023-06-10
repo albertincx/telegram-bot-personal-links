@@ -4,6 +4,12 @@ function hide() {
   return Markup.removeKeyboard();
 }
 
+function nolinks() {
+  return {
+    disable_web_page_preview: true,
+  };
+}
+
 function contact() {
   return {
     parse_mode: 'Markdown',
@@ -30,3 +36,4 @@ function contact() {
 
 module.exports.hide = hide;
 module.exports.contact = contact;
+module.exports.nolinks = nolinks;
