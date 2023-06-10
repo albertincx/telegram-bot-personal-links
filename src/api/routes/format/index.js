@@ -123,7 +123,7 @@ const format = (bot, botHelper) => {
           const uDir = wwwDirWithUser(id);
           try {
             // show links
-            let u = `${fs.readFileSync(uDir)}/from.json`;
+            let u = `${fs.readFileSync(`${uDir}/from.json`)}`;
             if (u) {
               u = JSON.parse(`${u}`);
               if (u.phone) {
@@ -159,7 +159,7 @@ const format = (bot, botHelper) => {
           if (mem[id] === ADD_1) {
             memLinks[id] = (memLinks[id] || []).concat(link);
             mem[id] = ADD_2;
-            ctx.reply(messages.addLink2());
+            ctx.reply(messages.addLink2(), keyboards.hide());
             return;
           }
           if (mem[id] === ADD_2) {
@@ -180,11 +180,11 @@ const format = (bot, botHelper) => {
               `${userDir}/from.json`,
               JSON.stringify({...from, phone}),
             );
-            ctx.reply(messages.completed(memPhones[id]));
+            ctx.reply(messages.completed(memPhones[id]), keyboards.hide());
           }
         } else {
           mem[id] = ADD_1;
-          ctx.reply(messages.addLink1());
+          ctx.reply(messages.addLink1(), keyboards.hide());
         }
       }
     } catch (e) {
