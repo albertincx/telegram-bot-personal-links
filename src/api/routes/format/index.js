@@ -129,7 +129,7 @@ const format = (bot, botHelper) => {
               if (u.phone) {
                 const linksDir = `${wwwDirWithPhone(u.phone)}/index.html`;
                 const links = fs.readFileSync(linksDir);
-                rep = `${links}`.replace('END', '');
+                rep = `Ваши ссылки:\n${links}`.replace('END', '');
               } else {
                 rep = 'Ссылки не найдены';
               }
