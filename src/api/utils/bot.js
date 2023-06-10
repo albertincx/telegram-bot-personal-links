@@ -84,7 +84,7 @@ class BotHelper {
   restartApp() {
     // eslint-disable-next-line global-require
     const {spawn} = require('child_process');
-    spawn('pm2', ['restart', 'Format'], {
+    spawn('pm2', ['restart', process.env.APP_NAME], {
       stdio: 'ignore',
       detached: true,
     }).unref();
@@ -95,7 +95,7 @@ class BotHelper {
     // eslint-disable-next-line global-require
     const {spawn} = require('child_process');
     const gpull = spawn('git', ['pull']);
-    const rest = spawn('pm2', ['restart', 'Format']);
+    const rest = spawn('pm2', ['restart', process.env.APP_NAME]);
     gpull.stdout.pipe(rest.stdin);
     rest.stdout.on('data', data => {
       this.sendAdmin(data);
