@@ -95,15 +95,7 @@ const ADD_EXIT = 'ADD_EXIT';
 const putLinks = id => `${memLinks[id].join('\n')}END`;
 
 const format = (bot, botHelper) => {
-  bot.command(['/start', '/help'], ctx => startOrHelp(ctx, botHelper));
-  bot.hears('👋 Help', ctx => startOrHelp(ctx, botHelper));
-  bot.hears('⌨️ Hide keyboard', ctx => {
-    try {
-      ctx.reply('Type /help to show.', keyboards.hide());
-    } catch (e) {
-      botHelper.sendError(e);
-    }
-  });
+  bot.command('start', ctx => startOrHelp(ctx, botHelper));
   const addToQueue = (ctx, matchPhone) => {
     try {
       const {update} = ctx;
